@@ -20,16 +20,23 @@ func NewHttpServer() *HttpServer {
 		router: mux.NewRouter(),
 	}
 
-	hs.registerRoutes()
+	http.Handle("/", handlers.LoggingHandler(os.Stdout, hs.router))
 
 	return hs
 }
 
+func (hs *HttpServer) RegisterHandler(route, method string, handler http.Handler) {
+	hs.router.Handle(route, handler).
+		Methods(method)
+}
+
 func (hs *HttpServer) registerRoutes() {
-	hs.router.HandleFunc("/{key}", GetValueHandler).
-		Methods("GET")
-	hs.router.HandleFunc("/{key}/{value}", SetValueHandler).
-		Methods("POST")
+	/*
+		hs.router.HandleFunc("/{key}", GetValueHandler).
+			Methods("GET")
+		hs.router.HandleFunc("/{key}/{value}", SetValueHandler).
+			Methods("POST")
+	*/
 
 	http.Handle("/", handlers.LoggingHandler(os.Stdout, hs.router))
 }

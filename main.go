@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/denderello/cacher/db"
+	"github.com/denderello/cacher/handler"
 	"github.com/denderello/cacher/server"
 	"github.com/spf13/pflag"
 )
@@ -28,5 +29,9 @@ func main() {
 	defer db.Close()
 
 	s := server.NewHttpServer()
+
+	s.RegisterHandler("/{key}", "GET", handler.NewGetKeyHandler(db))
+	s.RegisterHandler("/{key}/{value}", "POST", handler.NewSetKeyHandler(db))
+
 	s.Start(*serverAddr, *serverPort)
 }
