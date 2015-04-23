@@ -30,17 +30,6 @@ func (hs *HttpServer) RegisterHandler(route, method string, handler http.Handler
 		Methods(method)
 }
 
-func (hs *HttpServer) registerRoutes() {
-	/*
-		hs.router.HandleFunc("/{key}", GetValueHandler).
-			Methods("GET")
-		hs.router.HandleFunc("/{key}/{value}", SetValueHandler).
-			Methods("POST")
-	*/
-
-	http.Handle("/", handlers.LoggingHandler(os.Stdout, hs.router))
-}
-
 func (hs *HttpServer) Start(addr, port string) error {
 	log.Printf("Starting http server at %s:%s", addr, port)
 	return errgo.Mask(http.ListenAndServe(net.JoinHostPort(addr, port), nil))
