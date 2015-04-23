@@ -64,5 +64,9 @@ func (sfb *SlowFileDatabase) synchronizeToDisk() error {
 		rs = append(rs, []string{k, v})
 	}
 
+	if err := sfb.file.Truncate(0); err != nil {
+		return errgo.Mask(err)
+	}
+
 	return errgo.Mask(sfb.csvWriter.WriteAll(rs))
 }
