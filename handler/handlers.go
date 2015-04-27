@@ -46,7 +46,7 @@ func (h *SetKeyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.db.Set(k, v); err != nil {
 		http.Error(w, "Could not store key", 500)
-		log.Printf("Error while storing key '%s' with value '%s': %v", k, v, err)
+		log.Printf("Error while storing key '%s' with value '%s': %#v", k, v, err)
 		return
 	}
 
