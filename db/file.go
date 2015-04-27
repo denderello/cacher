@@ -8,22 +8,26 @@ import (
 )
 
 type SlowFileDatabase struct {
-	file      *os.File
-	state     map[string]string
-	csvReader *csv.Reader
-	csvWriter *csv.Writer
+	file          *os.File
+	state         map[string]string
+	csvReader     *csv.Reader
+	csvWriter     *csv.Writer
+	syncThreshold uint64
+	writeCounter  uint64
 }
 
-func NewSlowFileDatabase(filename string) (*SlowFileDatabase, error) {
+func NewSlowFileDatabase(filename string, syncThreshold uint64) (*SlowFileDatabase, error) {
 	f, err := os.OpenFile(filename, os.O_RDWR, 0666)
 	if err != nil {
 		return nil, errgo.Mask(err)
 	}
 
 	return &SlowFileDatabase{
-		file:      f,
-		csvReader: csv.NewReader(f),
-		csvWriter: csv.NewWriter(f),
+		file:          f,
+		csvReader:     csv.NewReader(f),
+		csvWriter:     csv.NewWriter(f),
+		syncThreshold: syncThreshold,
+		writeCounter:  0,
 	}, nil
 }
 
@@ -55,7 +59,13 @@ func (sfb *SlowFileDatabase) Get(key string) (string, error) {
 func (sfb *SlowFileDatabase) Set(key, value string) error {
 	sfb.state[key] = value
 
-	return errgo.Mask(sfb.synchronizeToDisk())
+	if sfb.writeCounter >= sfb.syncThreshold {
+		sfb.writeCounter = 0
+		return errgo.Mask(sfb.synchronizeToDisk())
+	}
+
+	sfb.writeCounter++
+	return nil
 }
 
 func (sfb *SlowFileDatabase) synchronizeToDisk() error {

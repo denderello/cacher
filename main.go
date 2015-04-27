@@ -11,15 +11,16 @@ import (
 )
 
 var (
-	serverAddr   = pflag.String("server-addr", "0.0.0.0", "Address the server listens on")
-	serverPort   = pflag.String("server-port", "8080", "Port the server listens on")
-	databaseFile = pflag.String("database-file", "db.csv", "Databse file to use")
+	serverAddr    = pflag.String("server-addr", "0.0.0.0", "Address the server listens on")
+	serverPort    = pflag.String("server-port", "8080", "Port the server listens on")
+	databaseFile  = pflag.String("database-file", "db.csv", "Databse file to use")
+	syncThreshold = pflag.Uint64("sync-threshold", 1000, "Threshold of writes after which data get's synced to disk")
 )
 
 func main() {
 	pflag.Parse()
 
-	db, err := db.NewSlowFileDatabase(*databaseFile)
+	db, err := db.NewSlowFileDatabase(*databaseFile, *syncThreshold)
 	if err != nil {
 		log.Fatalf("Could not read databse file: %v", err)
 	}
