@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"sync"
 
 	"github.com/denderello/cacher/db"
 	"github.com/denderello/cacher/handler"
@@ -28,10 +29,12 @@ func main() {
 	}
 	defer db.Close()
 
+	m := &sync.Mutex{}
+
 	s := server.NewHttpServer()
 
 	s.RegisterHandler("/{key}", "GET", handler.NewGetKeyHandler(db))
-	s.RegisterHandler("/{key}/{value}", "POST", handler.NewSetKeyHandler(db))
+	s.RegisterHandler("/{key}/{value}", "POST", handler.NewSetKeyHandler(m, db))
 
 	s.Start(*serverAddr, *serverPort)
 }
